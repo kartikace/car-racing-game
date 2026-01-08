@@ -5,141 +5,161 @@
 <title>Car Racing Game</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
-
 body {
-  margin: 0;
-  background: #111;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: Arial;
-  color: white;
+  background:#111;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial;
+  color:white;
+  margin:0;
+  height:100vh;
 }
 
-/* Game container */
+#container {
+  display:flex;
+  gap:20px;
+}
+
 #game {
-  width: 90vw;
-  max-width: 420px;
-  height: 90vh;
-  max-height: 750px;
-  background: #333;
-  position: relative;
-  overflow: hidden;
-  border: 3px solid white;
+  width:300px;
+  height:500px;
+  background:#444;
+  position:relative;
+  overflow:hidden;
+  border:3px solid #fff;
 }
 
 /* Road lines */
 .line {
-  position: absolute;
-  width: 10px;
-  height: 80px;
-  background: white;
-  left: 50%;
-  transform: translateX(-50%);
+  position:absolute;
+  width:10px;
+  height:80px;
+  background:white;
+  left:145px;
 }
 
 /* Player car */
-#player {
-  width: 50px;
-  height: 90px;
-  background: darkred;
-  position: absolute;
-  bottom: 10px;
-  border-radius: 10px;
+.car {
+  width:50px;
+  height:90px;
+  position:absolute;
+  bottom:10px;
+  left:125px;
+  background:red;
+  border-radius:10px;
 }
 
-#player::before {
-  content: "";
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background: #222;
-  top: 10px;
-  left: 10px;
-  border-radius: 5px;
+.car::before {
+  content:"";
+  position:absolute;
+  width:30px;
+  height:30px;
+  background:#222;
+  top:10px;
+  left:10px;
+  border-radius:5px;
 }
 
-/* Enemy cars */
+/* Enemy car */
 .enemy {
-  width: 50px;
-  height: 90px;
-  background: black;
-  position: absolute;
-  top: -100px;
-  border-radius: 10px;
+  width:50px;
+  height:90px;
+  background:black;
+  position:absolute;
+  top:-100px;
+  border-radius:10px;
 }
 
 .enemy::before {
-  content: "";
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background: #555;
-  top: 10px;
-  left: 10px;
-  border-radius: 5px;
+  content:"";
+  position:absolute;
+  width:30px;
+  height:30px;
+  background:#555;
+  top:10px;
+  left:10px;
+  border-radius:5px;
 }
 
-/* Start screen */
+/* Start Screen */
 #startScreen {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.85);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:10;
 }
 
-#startScreen button {
-  padding: 12px 25px;
-  font-size: 18px;
-  cursor: pointer;
+#startScreen h1 {
+  margin-bottom:20px;
+}
+
+#startBtn {
+  padding:12px 25px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+/* Panel */
+#panel {
+  text-align:center;
+}
+
+#restartBtn {
+  display:none;
+  padding:10px 20px;
+  font-size:16px;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div id="game">
+<div id="container">
+  <div id="game">
 
-  <div id="startScreen">
-    <h1>Car Racing Game</h1>
-    <button id="startBtn">Play</button>
+    <div id="startScreen">
+      <h1>Car Racing Game</h1>
+      <button id="startBtn">Play</button>
+    </div>
+
+    <div class="line" style="top:0"></div>
+    <div class="line" style="top:100px"></div>
+    <div class="line" style="top:200px"></div>
+    <div class="line" style="top:300px"></div>
+    <div class="line" style="top:400px"></div>
+
+    <div class="car" id="player"></div>
   </div>
 
-  <div class="line" style="top:0"></div>
-  <div class="line" style="top:120px"></div>
-  <div class="line" style="top:240px"></div>
-  <div class="line" style="top:360px"></div>
-  <div class="line" style="top:480px"></div>
-
-  <div id="player"></div>
-
+  <div id="panel">
+    <h2 id="score">Score: 0</h2>
+    <h3 id="gameOverText" style="display:none;">Game Over</h3>
+    <button id="restartBtn">Restart</button>
+  </div>
 </div>
 
 <script>
 const game = document.getElementById("game");
 const player = document.getElementById("player");
+const scoreText = document.getElementById("score");
+const restartBtn = document.getElementById("restartBtn");
+const gameOverText = document.getElementById("gameOverText");
 const startScreen = document.getElementById("startScreen");
 const startBtn = document.getElementById("startBtn");
 const lines = document.querySelectorAll(".line");
 
-let playerLeft = 0;
-let gameStarted = false;
+let playerLeft = 125;
+let score = 0;
 let gameOver = false;
 let speed = 5;
-
-/* Center player */
-window.onload = () => {
-  playerLeft = (game.clientWidth / 2) - 25;
-  player.style.left = playerLeft + "px";
-};
+let gameStarted = false;
 
 /* Start game */
 startBtn.onclick = () => {
@@ -147,64 +167,52 @@ startBtn.onclick = () => {
   gameStarted = true;
 };
 
-/* Keyboard controls */
+/* Controls */
 document.addEventListener("keydown", e => {
   if (!gameStarted || gameOver) return;
-
-  const maxRight = game.clientWidth - 50;
-
-  if (e.key === "ArrowLeft" && playerLeft > 0) {
-    playerLeft -= 25;
-  }
-  if (e.key === "ArrowRight" && playerLeft < maxRight) {
-    playerLeft += 25;
-  }
-
+  if (e.key === "ArrowLeft" && playerLeft > 0) playerLeft -= 25;
+  if (e.key === "ArrowRight" && playerLeft < 250) playerLeft += 25;
   player.style.left = playerLeft + "px";
 });
 
-/* Touch controls */
 game.addEventListener("touchstart", e => {
   if (!gameStarted || gameOver) return;
-
   const touchX = e.touches[0].clientX;
-  const rect = game.getBoundingClientRect();
-  const mid = rect.left + rect.width / 2;
-  const maxRight = game.clientWidth - 50;
-
-  if (touchX < mid && playerLeft > 0) {
-    playerLeft -= 25;
-  }
-  if (touchX > mid && playerLeft < maxRight) {
-    playerLeft += 25;
-  }
-
+  const gameX = game.getBoundingClientRect().left;
+  const mid = gameX + 150;
+  if (touchX < mid && playerLeft > 0) playerLeft -= 25;
+  if (touchX > mid && playerLeft < 250) playerLeft += 25;
   player.style.left = playerLeft + "px";
 });
 
 /* Road animation */
 setInterval(() => {
   if (!gameStarted || gameOver) return;
-
   lines.forEach(line => {
     let top = line.offsetTop + speed;
-    if (top > game.clientHeight) top = -80;
+    if (top > 500) top = -80;
     line.style.top = top + "px";
   });
 }, 30);
 
-/* Enemy generation */
+/* Enemy creation */
 function createEnemy() {
   if (!gameStarted || gameOver) return;
 
   const enemy = document.createElement("div");
   enemy.className = "enemy";
-  enemy.style.left = Math.random() * (game.clientWidth - 50) + "px";
+  enemy.style.left = Math.floor(Math.random() * 6) * 50 + "px";
   game.appendChild(enemy);
 
   let enemyTop = -100;
 
   const move = setInterval(() => {
+    if (gameOver) {
+      clearInterval(move);
+      enemy.remove();
+      return;
+    }
+
     enemyTop += speed + 1;
     enemy.style.top = enemyTop + "px";
 
@@ -217,22 +225,49 @@ function createEnemy() {
       e.left < p.right &&
       e.right > p.left
     ) {
-      gameOver = true;
-      startScreen.style.display = "flex";
-      startScreen.innerHTML = "<h1>Game Over</h1><button onclick='location.reload()'>Restart</button>";
+      endGame();
       clearInterval(move);
     }
 
-    if (enemyTop > game.clientHeight) {
+    if (enemyTop > 500) {
       enemy.remove();
       clearInterval(move);
     }
   }, 30);
 }
 
-setInterval(createEnemy, 1500);
+function endGame() {
+  gameOver = true;
+  gameOverText.style.display = "block";
+  restartBtn.style.display = "block";
+}
+
+/* Restart → back to start screen */
+restartBtn.onclick = () => {
+  document.querySelectorAll(".enemy").forEach(e => e.remove());
+  score = 0;
+  speed = 5;
+  playerLeft = 125;
+  player.style.left = "125px";
+  scoreText.innerText = "Score: 0";
+  gameOver = false;
+  gameStarted = false;
+  gameOverText.style.display = "none";
+  restartBtn.style.display = "none";
+  startScreen.style.display = "flex";
+};
+
+/* Loops */
+setInterval(() => { if (gameStarted && !gameOver) createEnemy(); }, 1500);
+
+setInterval(() => {
+  if (gameStarted && !gameOver) {
+    score++;
+    if (score % 10 === 0) speed += 0.5;
+    scoreText.innerText = "Score: " + score;
+  }
+}, 500);
 </script>
 
 </body>
 </html>
-
